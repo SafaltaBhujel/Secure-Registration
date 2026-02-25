@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set Up 2FA</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #fcdde5;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      animation: fadeIn 1s ease;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      width: 100%;
+      max-width: 450px;
+      animation: popIn 0.5s ease;
+    }
+
+    .icon-header {
+      font-size: 40px;
+      text-align: center;
+    }
+
+    h2 {
+      text-align: center;
+      color: #e91e63;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin: 1rem 0;
+    }
+
+    .step {
+      flex: 1;
+      text-align: center;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .step.active {
+      font-weight: bold;
+      color: #e91e63;
+    }
+
+    img.qr {
+      display: block;
+      margin: 1rem auto;
+      width: 220px;
+      height: 220px;
+    }
+
+    .otp-input {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin: 1rem 0;
+    }
+
+    .verify-btn {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 1rem;
+      background-color: #e91e63;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .verify-btn:hover {
+      background-color: #d81b60;
+    }
+
+    .email-verify {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin: 1rem 0;
+      color: #fff;
+      background-color: #4caf50;
+      padding: 0.6rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .email-verify:hover {
+      background-color: #388e3c;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon-header">🔒</div>
+    <h2>Set Up Two-Factor Authentication</h2>
+
+    <div class="step-indicator">
+      <div class="step active">Step 1<br>Scan</div>
+      <div class="step active">Step 2<br>Enter Code</div>
+      <div class="step">Step 3<br>Success</div>
+    </div>
+
+    <p>Scan this QR code using your Google Authenticator app or similar:</p>
+
+    {% if qr_code %}
+      <img class="qr" src="data:image/png;base64,{{ qr_code }}" alt="2FA QR Code" />
+    {% endif %}
+
+    <p>If unable to scan, manually enter this code in your app:</p>
+    <strong>{{ secret }}</strong>
+
+    {% if token %}
+      <a href="{{ url_for('verify_email', token=token) }}" class="email-verify">Verify Your Email</a>
+    {% endif %}
+
+    <!-- ✅ Proper form to submit 2FA code -->
+    <form action="{{ url_for('verify_2fa') }}" method="POST">
+      <input class="otp-input" type="text" name="code" placeholder="Enter 6-digit code" required>
+      <button class="verify-btn" type="submit">Verify Code</button>
+    </form>
+
+    <p style="text-align: center;">After setup, <a href="{{ url_for('login') }}">click here to log in</a>.</p>
+  </div>
+</body>
+</html>

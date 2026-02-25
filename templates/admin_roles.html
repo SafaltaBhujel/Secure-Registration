@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Roles Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink: #e75480;
+      --coral: #ff6f61;
+      --purple: #9b59b6;
+      --white: #ffffff;
+      --glass-bg: rgba(255, 255, 255, 0.3);
+      --glass-border: rgba(255, 255, 255, 0.5);
+      --text-dark: #333333;
+      --text-light: #fafafa;
+      --shadow-color: rgba(231, 84, 128, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #ffe6f0 0%, #fff5ec 100%);
+      color: var(--text-dark);
+      margin: 0;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 24px var(--shadow-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--pink);
+      border-left: 6px solid var(--pink);
+      padding-left: 1rem;
+      text-shadow: 0 0 8px var(--pink);
+    }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+
+    nav a {
+      padding: 0.5rem 1.3rem;
+      border-radius: 30px;
+      background: linear-gradient(45deg, var(--pink), var(--coral));
+      color: var(--white);
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 4px 10px var(--shadow-color);
+      transition: all 0.3s ease;
+    }
+
+    nav a:hover {
+      background: linear-gradient(45deg, var(--coral), var(--purple));
+      box-shadow: 0 6px 20px rgba(155, 89, 182, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .role-list {
+      width: 100%;
+      max-width: 900px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 24px rgba(231, 84, 128, 0.15);
+      margin-bottom: 2rem;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .role-list:hover {
+      box-shadow: 0 10px 36px rgba(231, 84, 128, 0.3);
+    }
+
+    .role-list ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .role-list li {
+      font-size: 1.2rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--glass-border);
+      color: var(--text-dark);
+      transition: color 0.3s ease, transform 0.3s ease;
+      cursor: default;
+    }
+
+    .role-list li:last-child {
+      border-bottom: none;
+    }
+
+    .role-list li:hover {
+      color: var(--purple);
+      transform: translateX(8px);
+      cursor: pointer;
+    }
+
+    .no-roles {
+      text-align: center;
+      font-style: italic;
+      color: #999;
+      font-size: 1.1rem;
+      padding: 2rem 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 0.9rem 3rem;
+      background: linear-gradient(45deg, var(--pink), var(--coral));
+      border-radius: 30px;
+      color: var(--white);
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 6px 20px var(--shadow-color);
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .back-link:hover {
+      background: linear-gradient(45deg, var(--coral), var(--purple));
+      box-shadow: 0 10px 36px rgba(155, 89, 182, 0.6);
+      transform: translateY(-3px);
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      nav {
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: flex-start;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Admin Roles</h1>
+    <nav>
+      <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('dashboard') }}">User Panel</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+  </header>
+
+  <div class="role-list">
+    {% if roles %}
+      <ul>
+        {% for role in roles %}
+          <li>{{ role.name }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="no-roles">No roles found.</div>
+    {% endif %}
+  </div>
+
+  <a class="back-link" href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+
+</body>
+</html>

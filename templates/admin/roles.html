@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Role Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink: #d6336c;          /* strong but elegant pink */
+      --white: #ffffff;
+      --gray-light: #f7f7f9;    /* very light gray for backgrounds */
+      --gray-mid: #cccbd1;      /* medium gray for borders */
+      --text-dark: #2c2c34;     /* dark text for contrast */
+      --glass-bg: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: var(--gray-light);
+      color: var(--text-dark);
+      padding: 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 1.4rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 4px 8px rgb(214 51 108 / 0.1);
+    }
+
+    header h1 {
+      color: var(--pink);
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    nav a {
+      color: var(--pink);
+      margin-left: 1.5rem;
+      text-decoration: none;
+      padding: 0.5rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      border: 2px solid transparent;
+      transition: all 0.25s ease;
+      background: transparent;
+    }
+
+    nav a:hover,
+    nav a:focus {
+      background: var(--pink);
+      color: var(--white);
+      border-color: var(--pink);
+      box-shadow: 0 6px 12px rgb(214 51 108 / 0.25);
+      outline: none;
+    }
+
+    .table-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--white);
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
+      border: 1px solid var(--gray-mid);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+      color: var(--text-dark);
+    }
+
+    thead {
+      background: var(--pink);
+      color: var(--white);
+      border-radius: 12px;
+    }
+
+    th, td {
+      padding: 1rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-mid);
+    }
+
+    th {
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      user-select: none;
+    }
+
+    tbody tr:hover {
+      background: #ffe6f0; /* subtle pink highlight */
+    }
+
+    td:first-child {
+      font-weight: 600;
+      color: var(--pink);
+    }
+
+    td[colspan] {
+      text-align: center;
+      color: var(--gray-mid);
+      font-style: italic;
+      padding: 2rem 1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.8rem;
+      border-radius: 12px;
+      background: #ffd6e8; /* pale pink */
+      color: var(--pink);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tbody tr {
+        margin-bottom: 1.8rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: var(--white);
+        box-shadow: 0 3px 10px rgb(0 0 0 / 0.05);
+        border: 1px solid var(--gray-mid);
+      }
+
+      td {
+        padding-left: 50%;
+        position: relative;
+        text-align: left;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 1rem;
+        top: 1rem;
+        font-weight: 700;
+        color: var(--pink);
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Role Management</h1>
+    <nav>
+      <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+      <a href="{{ url_for('dashboard') }}">User Dashboard</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+  </header>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Role Name</th>
+          <th>Permissions</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for role in roles %}
+        <tr>
+          <td data-label="Role Name">{{ role.name }}</td>
+          <td data-label="Permissions">
+            {% for perm in role.permissions.split(',') %}
+              <span class="badge">{{ perm.strip() }}</span>
+            {% endfor %}
+          </td>
+          <td data-label="Description">{{ descriptions.get(role.name, 'No description') }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3">No roles found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>

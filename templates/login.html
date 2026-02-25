@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  <!-- reCAPTCHA v3 -->
+  <script src="https://www.google.com/recaptcha/api.js?render={{ site_key }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('form');
+      const submitBtn = form.querySelector('button[type="submit"]');
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        submitBtn.disabled = true;
+
+        grecaptcha.ready(() => {
+          grecaptcha.execute('{{ site_key }}', { action: 'login' })
+            .then(token => {
+              document.getElementById('g-recaptcha-response').value = token;
+              form.submit();
+            })
+            .catch(() => {
+              alert('reCAPTCHA verification failed. Please try again.');
+              submitBtn.disabled = false;
+            });
+        });
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="form-box">
+
+      <!-- Lock Icon -->
+      <div class="icon-header" style="text-align:center; margin-bottom: 1rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+
+      <h2 style="text-align:center;">Log In</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert {{ category }}" role="alert" style="margin-bottom: 1em;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" novalidate autocomplete="off">
+        <!-- Hidden fields to trick autofill -->
+        <input type="text" name="fakeuser" style="display:none" autocomplete="off" />
+        <input type="password" name="fakepass" style="display:none" autocomplete="off" />
+
+        <label for="username">Username</label>
+        <input id="username" name="username" placeholder="Username" required autocomplete="off" />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" placeholder="Password" required autocomplete="new-password" />
+
+        <!-- Forgot password -->
+        <div class="forgot-link" style="text-align: center; margin-bottom: 1em;">
+          <a href="{{ url_for('forgot_password') }}" style="color: #e91e63; font-weight: 500; text-decoration: none;">
+            Forgot Password?
+          </a>
+        </div>
+
+        <!-- reCAPTCHA -->
+        <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response" />
+
+        <!-- Submit button -->
+        <button type="submit" style="width: 100%;">Login</button>
+      </form>
+
+      <!-- Google login -->
+      <div style="text-align: center; margin-top: 15px;">
+        <a href="{{ url_for('login_google') }}" class="google-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #444;">
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" style="width: 20px; height: 20px;" />
+          Login with Google
+        </a>
+      </div>
+
+      <!-- Register link -->
+      <p class="switch-link" style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+        New here? <a href="{{ url_for('register') }}">Register</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

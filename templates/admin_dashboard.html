@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --main-bg: linear-gradient(135deg, #fce3ec, #e0f7fa);
+      --sidebar-bg: #1e1e2f;
+      --accent: #ff5c8d;
+      --card-bg: #ffffff;
+      --text: #333;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--main-bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: var(--sidebar-bg);
+      color: #fff;
+      padding: 2rem 1rem;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar h2 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .sidebar a {
+      color: #ccc;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .sidebar a i {
+      margin-right: 12px;
+    }
+
+    .sidebar a:hover {
+      background-color: #2f2f45;
+      color: #fff;
+    }
+
+    .main-content {
+      margin-left: 250px;
+      flex: 1;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      color: var(--accent);
+    }
+
+    .user-info {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      left: -30%;
+      width: 160%;
+      height: 160%;
+      background: radial-gradient(circle, rgba(255,92,141,0.1), transparent);
+      transform: rotate(45deg);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .card i {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .card span a {
+      text-decoration: none;
+      color: var(--text);
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: inline-block;
+      transition: color 0.2s ease;
+    }
+
+    .card span a:hover {
+      color: var(--accent);
+    }
+
+    /* Toggle Button */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      color: var(--accent);
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <h2>SecureApp</h2>
+    <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="{{ url_for('manage_users') }}"><i class="fas fa-users-cog"></i> Manage Users</a>
+    <a href="{{ url_for('manage_roles') }}"><i class="fas fa-user-tag"></i> Manage Roles</a>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-chart-line"></i> User Panel</a>
+    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </nav>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="header">
+      <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <h1>Welcome, {{ user['username'] }}</h1>
+      <div class="user-info">Role: <strong>{{ user['role'] }}</strong></div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <i class="fas fa-users-cog"></i>
+        <span><a href="{{ url_for('manage_users') }}">Manage Users</a></span>
+      </div>
+      <div class="card">
+        <i class="fas fa-user-tag"></i>
+        <span><a href="{{ url_for('manage_roles') }}">Manage Roles</a></span>
+      </div>
+      <div class="card">
+        <i class="fas fa-chart-line"></i>
+        <span><a href="{{ url_for('dashboard') }}">User Dashboard</a></span>
+      </div>
+      <div class="card">
+        <i class="fas fa-sign-out-alt"></i>
+        <span><a href="{{ url_for('logout') }}">Logout</a></span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

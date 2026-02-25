@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard - SecureApp</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --color-primary: #8e44ad;  /* rich purple */
+      --color-primary-hover: #e91e63; /* vibrant pink */
+      --color-gradient-start: #8e44ad;
+      --color-gradient-end: #e91e63;
+      --color-bg-light: #f4f6fb;
+      --color-bg-white: #ffffff;
+      --color-text-dark: #2c3e50;
+      --color-text-muted: #7f8c8d;
+      --color-shadow-light: rgba(142, 68, 173, 0.15); /* subtle purple shadow */
+      --border-radius: 16px;
+      --transition-speed: 0.4s;
+      --sidebar-width: 260px;
+      --font-sans: 'Poppins', sans-serif;
+    }
+
+    body.dark {
+      --color-bg-light: #121417;
+      --color-bg-white: #1e1f26;
+      --color-text-dark: #ecf0f1;
+      --color-text-muted: #95a5a6;
+      --color-shadow-light: rgba(142, 68, 173, 0.25);
+      background-color: var(--color-bg-light);
+      color: var(--color-text-dark);
+    }
+
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: var(--font-sans);
+      transition:
+        background-color var(--transition-speed) ease,
+        color var(--transition-speed) ease,
+        box-shadow var(--transition-speed) ease,
+        transform var(--transition-speed) ease;
+    }
+
+    body {
+      background-color: var(--color-bg-light);
+      color: var(--color-text-dark);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Sidebar with gradient background */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: var(--sidebar-width);
+      background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+      padding: 3rem 2rem;
+      display: flex;
+      flex-direction: column;
+      border-top-right-radius: var(--border-radius);
+      border-bottom-right-radius: var(--border-radius);
+      box-shadow:
+        0 4px 15px rgba(142, 68, 173, 0.3);
+      color: white;
+    }
+
+    body.dark .sidebar {
+      background: linear-gradient(135deg, #5e3370, #b33572);
+      box-shadow:
+        0 6px 20px rgba(142, 68, 173, 0.5);
+    }
+
+    .sidebar h2 {
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 4rem;
+      user-select: none;
+      letter-spacing: 3px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      text-transform: uppercase;
+    }
+
+    .nav-link {
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.6rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+      border-radius: var(--border-radius);
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      box-shadow:
+        inset 0 0 0 0 var(--color-primary);
+      transition:
+        background-color var(--transition-speed),
+        color var(--transition-speed),
+        box-shadow var(--transition-speed);
+    }
+
+    .nav-link:hover {
+      background-color: var(--color-primary-hover);
+      color: white;
+      box-shadow:
+        0 6px 12px rgba(233, 30, 99, 0.4);
+      transform: scale(1.05);
+    }
+
+    .nav-link.active {
+      background-color: var(--color-primary-hover);
+      color: white;
+      box-shadow:
+        0 6px 20px rgba(233, 30, 99, 0.6);
+      transform: scale(1.07);
+    }
+
+    /* Main content */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 3rem 4rem;
+      height: 100vh;
+      overflow-y: auto;
+      background-color: var(--color-bg-light);
+      transition: background-color var(--transition-speed);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.dark .main-content {
+      background-color: var(--color-bg-white);
+    }
+
+    /* Topbar */
+    .topbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1.2rem;
+      margin-bottom: 3.5rem;
+    }
+
+    button.logout-btn,
+    button.dark-mode-toggle {
+      background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+      border: none;
+      color: white;
+      padding: 0.65rem 1.6rem;
+      font-weight: 700;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      box-shadow:
+        0 6px 20px rgba(142, 68, 173, 0.3);
+      transition:
+        background-color var(--transition-speed),
+        box-shadow var(--transition-speed),
+        transform 0.25s ease;
+      user-select: none;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      font-family: var(--font-sans);
+    }
+
+    button.logout-btn:hover,
+    button.dark-mode-toggle:hover {
+      background: var(--color-primary-hover);
+      box-shadow:
+        0 8px 30px rgba(233, 30, 99, 0.6);
+      transform: scale(1.08);
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .welcome-section h1 {
+      font-weight: 800;
+      font-size: 3.4rem;
+      color: var(--color-primary);
+      letter-spacing: 2px;
+      text-shadow:
+        1px 1px 3px rgba(142, 68, 173, 0.5);
+    }
+
+    /* Dashboard grid */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 3.4rem;
+      flex-grow: 1;
+    }
+
+    /* Cards with subtle neumorphic style */
+    .card {
+      background-color: var(--color-bg-white);
+      border-radius: var(--border-radius);
+      padding: 2.4rem 2.8rem;
+      box-shadow:
+        8px 8px 16px rgba(0,0,0,0.07),
+        -8px -8px 16px rgba(255,255,255,0.9);
+      transition:
+        box-shadow var(--transition-speed),
+        transform var(--transition-speed);
+      color: var(--color-text-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    body.dark .card {
+      background-color: var(--color-bg-light);
+      box-shadow:
+        inset 8px 8px 16px rgba(0,0,0,0.4),
+        inset -8px -8px 16px rgba(255,255,255,0.1);
+      color: var(--color-text-dark);
+    }
+
+    .card:hover {
+      box-shadow:
+        0 12px 24px rgba(142, 68, 173, 0.25),
+        0 8px 12px rgba(233, 30, 99, 0.15);
+      transform: translateY(-7px) scale(1.03);
+      cursor: pointer;
+    }
+
+    .card h3 {
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 1.2rem;
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    .card p {
+      font-size: 1.05rem;
+      color: var(--color-text-muted);
+      margin-bottom: 1.3rem;
+      line-height: 1.6;
+    }
+
+    /* Profile image */
+    .profile-info img {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 4px solid var(--color-primary);
+      object-fit: cover;
+      margin-bottom: 1.6rem;
+      box-shadow:
+        0 8px 20px rgba(142, 68, 173, 0.3);
+      transition: box-shadow var(--transition-speed);
+    }
+
+    /* User name & role */
+    .profile-info div {
+      font-weight: 700;
+      color: var(--color-text-dark);
+      margin-bottom: 0.6rem;
+      user-select: none;
+      font-size: 1.25rem;
+      letter-spacing: 0.03em;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+      color: white;
+      padding: 0.45em 1.4em;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 9999px;
+      box-shadow:
+        0 6px 15px rgba(142, 68, 173, 0.4);
+      user-select: none;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Upload form */
+    form.upload-form {
+      width: 100%;
+      margin-top: 1.6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    form.upload-form input[type="file"] {
+      cursor: pointer;
+      padding: 0.45rem;
+      border-radius: var(--border-radius);
+      border: 1.8px solid var(--color-text-muted);
+      width: 80%;
+      font-size: 1rem;
+      transition: border-color var(--transition-speed);
+      box-shadow:
+        inset 2px 2px 5px rgba(255,255,255,0.7),
+        inset -2px -2px 5px rgba(0,0,0,0.05);
+    }
+
+    form.upload-form input[type="file"]:hover {
+      border-color: var(--color-primary);
+      box-shadow:
+        0 0 8px var(--color-primary);
+    }
+
+    form.upload-form button {
+      background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+      color: white;
+      border: none;
+      padding: 0.7rem 1.8rem;
+      border-radius: var(--border-radius);
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow:
+        0 8px 20px rgba(142, 68, 173, 0.3);
+      transition:
+        background-color var(--transition-speed),
+        transform 0.25s ease,
+        box-shadow var(--transition-speed);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    form.upload-form button:hover {
+      background: var(--color-primary-hover);
+      transform: scale(1.1);
+      box-shadow:
+        0 10px 30px rgba(233, 30, 99, 0.6);
+    }
+
+    /* Links */
+    a {
+      color: var(--color-primary);
+      font-weight: 700;
+      text-decoration: none;
+      transition: color var(--transition-speed);
+      letter-spacing: 0.03em;
+    }
+
+    a:hover {
+      color: var(--color-primary-hover);
+      text-decoration: underline;
+    }
+
+    /* Admin card buttons */
+    .card a.button-link {
+      display: inline-block;
+      margin-top: 1.4rem;
+      padding: 0.7rem 1.6rem;
+      border-radius: var(--border-radius);
+      background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+      color: white;
+      font-weight: 700;
+      box-shadow:
+        0 8px 20px rgba(142, 68, 173, 0.3);
+      transition:
+        background-color var(--transition-speed),
+        transform 0.25s ease,
+        box-shadow var(--transition-speed);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card a.button-link:hover {
+      background-color: var(--color-primary-hover);
+      transform: scale(1.1);
+      box-shadow:
+        0 10px 30px rgba(233, 30, 99, 0.6);
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 2rem 1.5rem;
+      }
+      .dashboard {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>SecureApp</h2>
+    <a href="#" class="nav-link active">Dashboard</a>
+    <a href="#" class="nav-link">Profile</a>
+    <a href="#" class="nav-link">Settings</a>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Toggle dark mode">🌙 Dark Mode</button>
+      <form action="{{ url_for('logout') }}" method="POST" style="margin:0;">
+        <button class="logout-btn" aria-label="Logout">Logout</button>
+      </form>
+    </div>
+
+    <section class="welcome-section" aria-label="Welcome message">
+      <h1>Welcome, {{ user['username'] }}!</h1>
+    </section>
+
+    <section class="dashboard" aria-label="Dashboard cards">
+      <article class="card profile-info" aria-label="Profile information">
+        <img src="{{ url_for('static', filename='profile_images/' + profile_image) }}"
+             alt="Profile Image"
+             onerror="this.onerror=null;this.src='{{ url_for('static', filename='profile_images/default.png') }}';" />
+        <div>{{ user['username'] }}</div>
+        <div><span class="badge">{{ role|capitalize }}</span></div>
+
+        <form class="upload-form" method="POST" enctype="multipart/form-data" aria-label="Upload new profile image">
+          <input type="file" name="profile_image" accept=".png,.jpg,.jpeg" required />
+          <button type="submit">Upload New Image</button>
+        </form>
+      </article>
+
+      <article class="card" aria-label="Account overview">
+        <h3>Account Overview</h3>
+        <p><strong>Email:</strong> {{ user['email'] }}</p>
+        <p><strong>Last login:</strong> {{ last_login or 'N/A' }}</p>
+      </article>
+
+      <article class="card" aria-label="Security settings">
+        <h3>Security Settings</h3>
+        <p>Two-Factor Authentication: {{ 'Enabled' if user['otp_secret'] else 'Disabled' }}</p>
+        <p><a href="{{ url_for('change_password') }}">Change Password</a></p>
+      </article>
+
+      <article class="card" aria-label="Support information">
+        <h3>Support</h3>
+        <p>Need help? <a href="mailto:support@secureapp.com">Contact Support</a></p>
+      </article>
+
+      {% if role == 'admin' %}
+      <article class="card" aria-label="Admin tools">
+        <h3>Admin Tools</h3>
+        <p>Manage users and permissions directly from the admin panel.</p>
+        <a href="{{ url_for('manage_users') }}" class="button-link">Go to Admin Panel</a>
+        <a href="{{ url_for('view_roles') }}" class="button-link">View Roles & Permissions</a>
+      </article>
+      {% endif %}
+    </section>
+  </main>
+
+  <script>
+    const toggleBtn = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    function setDarkMode(enabled) {
+      if (enabled) {
+        body.classList.add('dark');
+        toggleBtn.textContent = '☀️ Light Mode';
+      } else {
+        body.classList.remove('dark');
+        toggleBtn.textContent = '🌙 Dark Mode';
+      }
+      localStorage.setItem('darkMode', enabled);
+    }
+
+    toggleBtn.addEventListener('click', () => setDarkMode(!body.classList.contains('dark')));
+
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode === 'true') setDarkMode(true);
+  </script>
+</body>
+</html>

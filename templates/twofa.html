@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Two-Factor Verification</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <div class="form-box">
+      <div class="icon-header">📱</div>
+      <h2>Verify 2FA Code</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <label for="code">Enter the 6-digit code from your authenticator app:</label>
+        <input type="text" id="code" name="code" placeholder="123456" required />
+        <button type="submit">Verify</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

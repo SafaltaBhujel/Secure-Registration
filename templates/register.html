@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  <!-- reCAPTCHA v3 -->
+  <script src="https://www.google.com/recaptcha/api.js?render={{ site_key }}"></script>
+
+  <style>
+    /* Premium reduced scale styling */
+    .form-box {
+      font-size: 0.92rem;
+    }
+
+    .form-box input,
+    .form-box button,
+    .form-box select,
+    .google-button {
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      height: auto;
+    }
+
+    .form-box label {
+      font-size: 0.9rem;
+    }
+
+    #generate-password {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    .google-button {
+      font-size: 0.85rem;
+      padding: 6px 10px;
+    }
+
+    .switch-link {
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      color: #333;
+    }
+
+    .switch-link a {
+      color: #4f46e5;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    /* Password criteria styles */
+    #password-criteria {
+      display: none;
+      background: #f9fafb;
+      border: 1px solid #e0e7ff;
+      border-radius: 8px;
+      padding: 1em 1.2em;
+      margin-bottom: 1em;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      box-shadow: 0 4px 12px rgba(67, 56, 202, 0.1);
+    }
+
+    #password-criteria p {
+      margin: 0 0 0.6em 0;
+      font-weight: 600;
+      color: #3730a3;
+    }
+
+    #password-criteria ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+
+    #password-criteria li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.6em;
+      color: #a5b4fc;
+      transition: color 0.3s ease;
+    }
+
+    #password-criteria li.valid {
+      color: #4ade80;
+    }
+
+    #password-criteria li svg {
+      width: 18px;
+      height: 18px;
+      margin-right: 0.6em;
+      fill: currentColor;
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper input {
+      flex-grow: 1;
+      padding-right: 2.5em;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      cursor: pointer;
+      fill: #6b7280;
+      width: 20px;
+      height: 20px;
+    }
+
+    .toggle-password:hover {
+      fill: #4f46e5;
+    }
+  </style>
+
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('form');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const passwordInput = document.getElementById('password');
+      const confirmInput = document.getElementById('confirm_password');
+      const strengthBar = document.getElementById('strength-bar').firstElementChild;
+      const strengthLabel = document.getElementById('strength-label');
+      const criteriaBox = document.getElementById('password-criteria');
+      const generateBtn = document.getElementById('generate-password');
+      const togglePassword = document.getElementById('toggle-password');
+
+      const criteriaItems = {
+        length: document.getElementById('length'),
+        uppercase: document.getElementById('uppercase'),
+        lowercase: document.getElementById('lowercase'),
+        number: document.getElementById('number'),
+        special: document.getElementById('special'),
+      };
+
+      let typingTimer;
+      const typingDelay = 1500;
+
+      passwordInput.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        const val = passwordInput.value;
+
+        if (val.length === 0) {
+          criteriaBox.style.display = 'none';
+          strengthBar.style.width = '0%';
+          strengthLabel.textContent = '';
+          Object.values(criteriaItems).forEach(item => item.classList.remove('valid'));
+          return;
+        }
+
+        criteriaBox.style.display = 'block';
+
+        const checks = {
+          length: val.length >= 8,
+          uppercase: /[A-Z]/.test(val),
+          lowercase: /[a-z]/.test(val),
+          number: /\d/.test(val),
+          special: /[\W_]/.test(val),
+        };
+
+        for (const [key, passed] of Object.entries(checks)) {
+          criteriaItems[key].classList.toggle('valid', passed);
+        }
+
+        const score = Object.values(checks).filter(Boolean).length;
+        const colors = ['#ccc', '#f44336', '#ff9800', '#ffc107', '#8bc34a', '#4caf50'];
+        const labels = ['Too Short', 'Weak 🔴', 'Fair 🟠', 'Good 🟡', 'Strong 🟢', 'Very Strong ✅'];
+        const widths = ['0%', '20%', '40%', '60%', '80%', '100%'];
+
+        strengthBar.style.width = widths[score];
+        strengthBar.style.backgroundColor = colors[score];
+        strengthLabel.textContent = labels[score];
+
+        typingTimer = setTimeout(() => {
+          criteriaBox.style.display = 'none';
+        }, typingDelay);
+      });
+
+      generateBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const strongPassword = generateStrongPassword();
+        passwordInput.value = strongPassword;
+        confirmInput.value = strongPassword;
+        passwordInput.dispatchEvent(new Event('input'));
+      });
+
+      togglePassword.addEventListener('click', () => {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+        confirmInput.type = type;
+        togglePassword.innerHTML = type === 'password' ? eyeIcon() : eyeOffIcon();
+      });
+
+      form.addEventListener('submit', event => {
+        if (passwordInput.value !== confirmInput.value) {
+          event.preventDefault();
+          alert('Passwords do not match.');
+          return;
+        }
+
+        event.preventDefault();
+        submitBtn.disabled = true;
+
+        grecaptcha.ready(() => {
+          grecaptcha.execute('{{ site_key }}', { action: 'register' })
+            .then(token => {
+              document.getElementById('g-recaptcha-response').value = token;
+              form.submit();
+            })
+            .catch(() => {
+              alert('reCAPTCHA failed.');
+              submitBtn.disabled = false;
+            });
+        });
+      });
+
+      function generateStrongPassword() {
+        const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const lower = 'abcdefghijklmnopqrstuvwxyz';
+        const numbers = '0123456789';
+        const symbols = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+        const all = upper + lower + numbers + symbols;
+        let password = upper[Math.floor(Math.random() * upper.length)]
+                     + lower[Math.floor(Math.random() * lower.length)]
+                     + numbers[Math.floor(Math.random() * numbers.length)]
+                     + symbols[Math.floor(Math.random() * symbols.length)];
+        for (let i = 4; i < 12; i++) {
+          password += all[Math.floor(Math.random() * all.length)];
+        }
+        return password.split('').sort(() => 0.5 - Math.random()).join('');
+      }
+
+      function eyeIcon() {
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+                </svg>`;
+      }
+
+      function eyeOffIcon() {
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.12 10.12 0 0 1 12 20c-7 0-11-8-11-8a17.49 17.49 0 0 1 5-5"/>
+                <path d="M1 1l22 22"/>
+                </svg>`;
+      }
+
+      togglePassword.innerHTML = eyeIcon();
+    });
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="form-box">
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
+             fill="none" stroke="#3a3f51" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             style="box-shadow: 0 2px 8px rgba(58,63,81,0.15); border-radius: 50%; background: #f5f7fa; padding: 12px;">
+          <circle cx="12" cy="7" r="4" />
+          <path d="M5.5 21a6.5 6.5 0 0 1 13 0" />
+        </svg>
+      </div>
+
+      <h2 style="text-align:center;">Create Your Account</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert {{ category }}" role="alert" style="margin-bottom:1em;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" novalidate>
+        <label for="username">Username</label>
+        <input id="username" type="text" name="username" placeholder="Choose a username" required autocomplete="username" />
+
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" placeholder="Enter your email" required autocomplete="email" />
+
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input id="password" type="password" name="password" placeholder="Create a password" required autocomplete="new-password" />
+          <span id="toggle-password" class="toggle-password" role="button" tabindex="0"></span>
+        </div>
+
+        <div id="password-criteria">
+          <p>Password must include:</p>
+          <ul>
+            <li id="length"><svg viewBox="0 0 24 24"><path d="M20.285 6.708L9 18l-5.285-5.285 1.414-1.414L9 15.172l9.871-9.871z"/></svg>At least 8 characters</li>
+            <li id="uppercase"><svg viewBox="0 0 24 24"><path d="M20.285 6.708L9 18l-5.285-5.285 1.414-1.414L9 15.172l9.871-9.871z"/></svg>An uppercase letter</li>
+            <li id="lowercase"><svg viewBox="0 0 24 24"><path d="M20.285 6.708L9 18l-5.285-5.285 1.414-1.414L9 15.172l9.871-9.871z"/></svg>A lowercase letter</li>
+            <li id="number"><svg viewBox="0 0 24 24"><path d="M20.285 6.708L9 18l-5.285-5.285 1.414-1.414L9 15.172l9.871-9.871z"/></svg>A number</li>
+            <li id="special"><svg viewBox="0 0 24 24"><path d="M20.285 6.708L9 18l-5.285-5.285 1.414-1.414L9 15.172l9.871-9.871z"/></svg>A special character</li>
+          </ul>
+        </div>
+
+        <button id="generate-password" type="button">Generate Strong Password</button>
+
+        <div id="strength-bar" style="background:#eee; height: 8px; margin-bottom: 5px; border-radius: 4px;">
+          <div style="width: 0%; height: 100%; background: #ccc; border-radius: 4px;"></div>
+        </div>
+        <div id="strength-label" style="font-weight: bold; margin-bottom: 1em;"></div>
+
+        <label for="confirm_password">Confirm Password</label>
+        <input id="confirm_password" type="password" placeholder="Repeat your password" required autocomplete="new-password" />
+
+        <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response" />
+
+        <button type="submit" style="width: 100%;">Register</button>
+      </form>
+
+      <div class="google-login" style="text-align:center; margin: 20px 0;">
+        <p>or</p>
+        <a href="{{ url_for('login_google') }}" class="google-button">
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" style="width:20px; vertical-align:middle;">
+          Sign up with Google
+        </a>
+      </div>
+
+      <p class="switch-link" style="text-align:center;">
+        Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
